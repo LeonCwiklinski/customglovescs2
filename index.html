@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Glove Float Calculator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+      background: #f7f7f7;
+    }
+    h1 { margin-bottom: 20px; }
+    .row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      align-items: center;
+    }
+    input {
+      width: 100px;
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      border: none;
+      background: #007bff;
+      color: white;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover { background: #0056b3; }
+    #output {
+      margin-top: 25px;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      white-space: pre-line;
+    }
+  </style>
+</head>
+<body>
+  <h1>Glove Float Calculator</h1>
+  <div id="inputs"></div>
+  <button onclick="calculate()">Calculate</button>
+  <div id="output">Average: —<br>Glove Float: —</div>
+
+  <script>
+    const inputContainer = document.getElementById('inputs');
+
+    // Generate 5 input rows
+    for (let i = 1; i <= 5; i++) {
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML = `
+        <label>Input ${i}: <input type="number" id="input${i}" step="any"></label>
+        <label>Skin Cap: <input type="number" id="cap${i}" step="any" value="1"></label>
+      `;
+      inputContainer.appendChild(row);
+    }
+
+    function calculate() {
+      let trueSum = 0;
+
+      for (let i = 1; i <= 5; i++) {
+        const inputFloat = parseFloat(document.getElementById(`input${i}`).value) || 0;
+        const cap = parseFloat(document.getElementById(`cap${i}`).value) || 1;
+        const trueFloat = inputFloat / cap; // normalize to cap=1
+        trueSum += trueFloat;
+      }
+
+      const avg = trueSum / 5;
+      const gloveFloat = 0.06 + 0.74 * avg;
+
+      document.getElementById('output').innerHTML =
+        `Average (true float): ${avg.toFixed(20)}\n` +
+        `Glove Float: ${gloveFloat.toFixed(20)}`;
+    }
+  </script>
+</body>
+</html>
