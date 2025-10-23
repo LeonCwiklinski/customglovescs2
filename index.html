@@ -5,30 +5,49 @@
   <title>Glove Float Calculator</title>
   <style>
     body {
-      font-family: sans-serif;
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 40px;
-      background: #f7f7f7;
+      justify-content: center;
+      padding: 40px 20px;
     }
-    h1 { margin-bottom: 20px; }
+    .container {
+      background: white;
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+      width: 450px;
+      max-width: 90%;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .section {
+      margin-bottom: 30px;
+    }
     .row {
       display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
+      justify-content: space-between;
+      margin-bottom: 12px;
       align-items: center;
     }
-    input {
+    .row input {
       width: 100px;
       padding: 6px;
       border-radius: 6px;
       border: 1px solid #ccc;
       text-align: center;
     }
+    label {
+      flex: 1;
+      margin-right: 10px;
+    }
     button {
-      margin-top: 20px;
-      padding: 10px 20px;
+      display: block;
+      width: 100%;
+      padding: 10px 0;
+      margin-top: 10px;
       border: none;
       background: #007bff;
       color: white;
@@ -36,24 +55,64 @@
       border-radius: 8px;
       cursor: pointer;
     }
-    button:hover { background: #0056b3; }
-    #output {
-      margin-top: 25px;
-      font-size: 18px;
-      font-weight: bold;
+    button:hover {
+      background: #0056b3;
+    }
+    #output, #reverseOutput {
       text-align: center;
+      font-weight: bold;
       white-space: pre-line;
+      margin-top: 15px;
+    }
+    .caps-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+    .caps-row input {
+      width: 95px;
     }
   </style>
 </head>
 <body>
-  <h1>Glove Float Calculator</h1>
-  <div id="inputs"></div>
-  <button onclick="calculate()">Calculate</button>
-  <div id="output">Average: —<br>Glove Float: —</div>
+  <div class="container">
+    <h1>Glove Float Calculator</h1>
+
+    <!-- Reverse Calculator -->
+    <div class="section">
+      <div class="row">
+        <label>Wanted Float: <input type="number" id="wantedFloat" step="any" value="0.1"></label>
+      </div>
+      <div class="caps-row">
+        <label>Lower Cap: <input type="number" id="reverseLow" step="any" value="0.06"></label>
+        <label>Upper Cap: <input type="number" id="reverseHigh" step="any" value="0.80"></label>
+      </div>
+      <button onclick="calculateReverse()">Calculate Avg Needed</button>
+      <div id="reverseOutput">Needed Average: —</div>
+    </div>
+
+    <!-- Inputs Section -->
+    <div class="section" id="inputsSection">
+      <!-- Generated input rows will go here -->
+    </div>
+    <button onclick="calculate()">Calculate</button>
+
+    <!-- Output Section -->
+    <div class="section" id="output">
+      Average: —<br>
+      Glove Float: —<br>
+      Custom Float: —
+    </div>
+
+    <!-- Custom Caps Section -->
+    <div class="section caps-row">
+      <label>Lower Cap: <input type="number" id="lowerCap" step="any" value="0.06"></label>
+      <label>Upper Cap: <input type="number" id="upperCap" step="any" value="0.80"></label>
+    </div>
+  </div>
 
   <script>
-    const inputContainer = document.getElementById('inputs');
+    const inputContainer = document.getElementById('inputsSection');
 
     // Generate 5 input rows
     for (let i = 1; i <= 5; i++) {
@@ -68,20 +127,40 @@
 
     function calculate() {
       let trueSum = 0;
-
       for (let i = 1; i <= 5; i++) {
         const inputFloat = parseFloat(document.getElementById(`input${i}`).value) || 0;
         const cap = parseFloat(document.getElementById(`cap${i}`).value) || 1;
-        const trueFloat = inputFloat / cap; // normalize to cap=1
+        const trueFloat = inputFloat / cap;
         trueSum += trueFloat;
       }
 
       const avg = trueSum / 5;
       const gloveFloat = 0.06 + 0.74 * avg;
 
+      const lowerCap = parseFloat(document.getElementById('lowerCap').value) || 0;
+      const upperCap = parseFloat(document.getElementById('upperCap').value) || 1;
+      const customFloat = lowerCap + (upperCap - lowerCap) * avg;
+
       document.getElementById('output').innerHTML =
         `Average (true float): ${avg.toFixed(20)}\n` +
-        `Glove Float: ${gloveFloat.toFixed(20)}`;
+        `Glove Float (0.06–0.80): ${gloveFloat.toFixed(20)}\n` +
+        `Custom Float (${lowerCap}–${upperCap}): ${customFloat.toFixed(20)}`;
+    }
+
+    function calculateReverse() {
+      const wanted = parseFloat(document.getElementById('wantedFloat').value) || 0;
+      const low = parseFloat(document.getElementById('reverseLow').value) || 0;
+      const high = parseFloat(document.getElementById('reverseHigh').value) || 1;
+
+      if (high - low === 0) {
+        document.getElementById('reverseOutput').innerText = 'Error: Upper and Lower Cap cannot be equal';
+        return;
+      }
+
+      const neededAvg = (wanted - low) / (high - low);
+
+      document.getElementById('reverseOutput').innerText =
+        `Needed Average (true float): ${neededAvg.toFixed(20)}`;
     }
   </script>
 </body>
